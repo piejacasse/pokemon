@@ -1,5 +1,6 @@
 #from bdb import effective
 #from email.errors import StartBoundaryNotFoundDefect
+from re import T
 import pandas
 from dataclasses import dataclass
 from rich.console import Console, ConsoleOptions, RenderResult
@@ -38,29 +39,12 @@ class Pokemon:
         # self.speed = self.stats[5]
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
-        strtype = ", ".join(self.type)
-        convmoves = [str(move) for move in self.moves]
-        strmoves = ", ".join(convmoves)
-        yield f"[b]Student:[/b] #{self.id}"
-        table = Table(title="POKEMON INFOS")
-        table.add_column("Name", style="cyan")
-        table.add_column("Type", style="green")
-        table.add_column("Health", style="magenta")
-        table.add_column("Attack", style="magenta")
-        table.add_column("Defense", style="magenta")
-        table.add_column("Special Attack", style="magenta")
-        table.add_column("Special Defense", style="magenta")
-        table.add_column("Speed", style="magenta")
-        table.add_column("Moves", style="orange")
-        table.add_row(self.name)
-        table.add_row(strtype)
-        table.add_row(self.stats.get('Health'))
-        table.add_row(self.stats.get('Attack'))
-        table.add_row(self.stats.get('Defense'))
-        table.add_row(self.stats.get('Special Attack'))
-        table.add_row(self.stats.get('Special Defense'))
-        table.add_row(self.stats.get('Speed'))
-        table.add_row(strmoves)
+        strtype = "\n".join(zubat.type)
+        convmoves = [str(move) for move in zubat.moves]
+        strmoves = "\n".join(convmoves)
+        yield f"[b]Pokemon infos[/b] [i]#{self.name}[/i]"
+        table = Table("Name", "Type", "Health", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Moves")
+        table.add_row(zubat.name, strtype, f"{zubat.stats.get('Health')}", f"{zubat.stats.get('Attack')}", f"{zubat.stats.get('Defense')}", f"{zubat.stats.get('Special Attack')}", f"{zubat.stats.get('Special Defense')}", f"{zubat.stats.get('Speed')}", strmoves)
         yield table
 
     # def __repr__(self):
@@ -69,17 +53,17 @@ class Pokemon:
     #     strmoves = ", ".join(convmoves)
         #return f"Name: {self.name}\nType: {strtype}\nHealth: {self.stats.get('Health')}\nAttack: {self.stats.get('Attack')}\nDefense: {self.stats.get('Defense')}\nSpecial Attack: {self.stats.get('Special Attack')}\nSpecial Defense: {self.stats.get('Special Defense')}\nSpeed: {self.stats.get('Speed')}\nMoves: {strmoves}"
         
-        ################### DATAFRAME PANDAS #########################
+        ################## DATAFRAME PANDAS #########################
         # data = [[self.name, strtype, self.stats.get('Health'), self.stats.get('Attack'), self.stats.get('Defense'), self.stats.get('Special Attack'), self.stats.get('Special Defense'), self.stats.get('Speed'), strmoves]]
         # headers=["Name", "Type", "Health", "Attack", "Defense", "Special Attack", "Special Defense", "Speed", "Moves"]
         # return pandas.DataFrame(data, headers).to_string()
 
-        ################## SERIES PANDAS #############################
+        ################# SERIES PANDAS #############################
         # data = [self.name, strtype, self.stats.get('Health'), self.stats.get('Attack'), self.stats.get('Defense'), self.stats.get('Special Attack'), self.stats.get('Special Defense'), self.stats.get('Speed'), strmoves]
         # index=["Name", "Type", "Health", "Attack", "Defense", "Special Attack", "Special Defense", "Speed", "Moves"]
         # return pandas.Series(data=data, index=index).to_string()
 
-        ################# TABLE RICH #################################
+        ################ TABLE RICH #################################
         # table = Table(title="POKEMON INFOS")
         # table.add_column("Name", style="cyan")
         # table.add_column("Type", style="green")
@@ -276,4 +260,21 @@ print(effectiveness)
 
 #print(zubat.damage(slowpoke,leechlife))
 #print(zubat.attack(slowpoke, leechlife))
-print(zubat)
+
+# strtype = "\n".join(zubat.type)
+# convmoves = [str(move) for move in zubat.moves]
+# strmoves = "\n".join(convmoves)
+# table = Table(title="POKEMON INFOS")
+# table.add_column("Name", style="cyan")
+# table.add_column("Type", style="green")
+# table.add_column("Health", style="magenta")
+# table.add_column("Attack", style="magenta")
+# table.add_column("Defense", style="magenta")
+# table.add_column("Sp. Attack", style="magenta")
+# table.add_column("Sp. Defense", style="magenta")
+# table.add_column("Speed", style="magenta")
+# table.add_column("Moves", style="dark_orange")
+# table.add_row(zubat.name, strtype, f"{zubat.stats.get('Health')}", f"{zubat.stats.get('Attack')}", f"{zubat.stats.get('Defense')}", f"{zubat.stats.get('Special Attack')}", f"{zubat.stats.get('Special Defense')}", f"{zubat.stats.get('Speed')}", strmoves)
+# Console().print(table)
+
+Console().print(zubat)

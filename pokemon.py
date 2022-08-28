@@ -1,11 +1,8 @@
-#from bdb import effective
-#from email.errors import StartBoundaryNotFoundDefect
-from re import T
 import pandas
-from dataclasses import dataclass
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.table import Table
 import random
+import math
 
 class Pokemon:
     """A class to represent a pokemon
@@ -37,17 +34,26 @@ class Pokemon:
         # self.spcatt = self.stats[3]
         # self.spcdef = self.stats[4]
         # self.speed = self.stats[5]
-
+    
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
-        strtype = "\n".join(zubat.type)
-        convmoves = [str(move) for move in zubat.moves]
+        strtype = "\n".join(self.type)
+        convmoves = [str(move) for move in self.moves]
         strmoves = "\n".join(convmoves)
-        yield f"[b]Pokemon infos[/b] [i]#{self.name}[/i]"
-        table = Table("Name", "Type", "Health", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Moves")
-        table.add_row(zubat.name, strtype, f"{zubat.stats.get('Health')}", f"{zubat.stats.get('Attack')}", f"{zubat.stats.get('Defense')}", f"{zubat.stats.get('Special Attack')}", f"{zubat.stats.get('Special Defense')}", f"{zubat.stats.get('Speed')}", strmoves)
+        table = Table(title=f"[b]Pokemon infos[/b] #{self.name}")
+        #table = Table("Name", "Type", "Health", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Moves", title=f"[b]Pokemon infos[/b] #{self.name}")
+        table.add_column("Name", style="cyan")
+        table.add_column("Type", style="green")
+        table.add_column("Health", style="magenta")
+        table.add_column("Attack", style="magenta")
+        table.add_column("Defense", style="magenta")
+        table.add_column("Sp. Attack", style="magenta")
+        table.add_column("Sp. Defense", style="magenta")
+        table.add_column("Speed", style="magenta")
+        table.add_column("Moves", style="dark_orange")
+        table.add_row(self.name, strtype, f"{self.stats.get('Health')}", f"{self.stats.get('Attack')}", f"{self.stats.get('Defense')}", f"{self.stats.get('Special Attack')}", f"{self.stats.get('Special Defense')}", f"{self.stats.get('Speed')}", strmoves)
         yield table
 
-    # def __repr__(self):
+    def __repr__(self):
     #     strtype = ", ".join(self.type)
     #     convmoves = [str(move) for move in self.moves]
     #     strmoves = ", ".join(convmoves)
@@ -64,26 +70,13 @@ class Pokemon:
         # return pandas.Series(data=data, index=index).to_string()
 
         ################ TABLE RICH #################################
-        # table = Table(title="POKEMON INFOS")
-        # table.add_column("Name", style="cyan")
-        # table.add_column("Type", style="green")
-        # table.add_column("Health", style="magenta")
-        # table.add_column("Attack", style="magenta")
-        # table.add_column("Defense", style="magenta")
-        # table.add_column("Special Attack", style="magenta")
-        # table.add_column("Special Defense", style="magenta")
-        # table.add_column("Speed", style="magenta")
-        # table.add_column("Moves", style="orange")
-        # table.add_row(self.name)
-        # table.add_row(strtype)
-        # table.add_row(self.stats.get('Health'))
-        # table.add_row(self.stats.get('Attack'))
-        # table.add_row(self.stats.get('Defense'))
-        # table.add_row(self.stats.get('Special Attack'))
-        # table.add_row(self.stats.get('Special Defense'))
-        # table.add_row(self.stats.get('Speed'))
-        # table.add_row(strmoves)
+        # strtype = "\n".join(zubat.type)
+        # convmoves = [str(move) for move in zubat.moves]
+        # strmoves = "\n".join(convmoves)
+        # table = Table("Name", "Type", "Health", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Moves")
+        # table.add_row(zubat.name, strtype, f"{zubat.stats.get('Health')}", f"{zubat.stats.get('Attack')}", f"{zubat.stats.get('Defense')}", f"{zubat.stats.get('Special Attack')}", f"{zubat.stats.get('Special Defense')}", f"{zubat.stats.get('Speed')}", strmoves)
         # return table
+        return self.name
 
     def damage(self, target, move):
         """
@@ -119,11 +112,12 @@ class Pokemon:
         headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
         effectiveness = pandas.DataFrame(data, headers, headers)
 
+        level = 1
+
         critical = 1
         if random.choice(range(0, 255, 1)) < self.stats.get('Speed') / 2:
             critical = (2 * level * self.stats.get('Attack') + 5) / (level + 5)
-            
-        level = 1
+            print("Critical!")
 
         attack = 1
         if move.category == 'Physical':
@@ -152,25 +146,6 @@ class Pokemon:
 
         return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * stab * type1 * type2 * randomnb
 
-    def attack(self, target, move):
-        """Allows your Pokemon to attack another pokemon with the move of your choice
-
-        Example:
-            zubat.attack(slowpoke, leechlife)
-
-        Args:
-            target(object): Pokemon targetted by the attack
-            move(object): move used to attack
-
-        Returns:
-
-        """
-        hptarget = target.stats.get('Health')
-        damage = move.power
-
-        return (f"Dommages faits: {damage}. Restent {hptarget - damage} HP à {target.name}")
-
-        
 class Move:
     """A class to represent a move to be performed by a Pokemon"""
     def __init__(self, name, type, category, power):
@@ -231,50 +206,67 @@ slowpoke = Pokemon(name="Slowpoke", type=["Water", "Psychic"], stats={"Health": 
 ########TYPE EFFECTIVENESS TABLE###########
 ###########################################
 
-data = [
-[1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
-[2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
-[1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
-[1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
-[1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
-[0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
-[1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
-[0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
-[1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
-[1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
-[1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
-[1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
-[1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
-[1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
-]
+# data = [
+# [1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
+# [2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
+# [1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
+# [1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
+# [1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
+# [0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
+# [1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
+# [0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
+# [1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
+# [1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
+# [1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
+# [1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
+# [1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
+# [1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
+# [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+# ]
 
-headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
-effectiveness = pandas.DataFrame(data, headers, headers)
-print(effectiveness)
+# headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
+# effectiveness = pandas.DataFrame(data, headers, headers)
+#print(effectiveness)
 #print(effectiveness.to_string())
 
 ###########################################
-##################BASTON###################
+####################JEU####################
 ###########################################
+dicodeck = {}
+deck = [zubat, "poupou", "loulou"]
+for pokemon in range(len(deck)):
+    dicodeck[pokemon] = deck[pokemon]
+print(dicodeck)
 
-#print(zubat.damage(slowpoke,leechlife))
-#print(zubat.attack(slowpoke, leechlife))
+decknum = [f"{number} {pokemon}" for number,pokemon in enumerate(deck)]
+strdeck = "\n".join(decknum)
+print(strdeck)
 
-# strtype = "\n".join(zubat.type)
-# convmoves = [str(move) for move in zubat.moves]
-# strmoves = "\n".join(convmoves)
-# table = Table(title="POKEMON INFOS")
-# table.add_column("Name", style="cyan")
-# table.add_column("Type", style="green")
-# table.add_column("Health", style="magenta")
-# table.add_column("Attack", style="magenta")
-# table.add_column("Defense", style="magenta")
-# table.add_column("Sp. Attack", style="magenta")
-# table.add_column("Sp. Defense", style="magenta")
-# table.add_column("Speed", style="magenta")
-# table.add_column("Moves", style="dark_orange")
-# table.add_row(zubat.name, strtype, f"{zubat.stats.get('Health')}", f"{zubat.stats.get('Attack')}", f"{zubat.stats.get('Defense')}", f"{zubat.stats.get('Special Attack')}", f"{zubat.stats.get('Special Defense')}", f"{zubat.stats.get('Speed')}", strmoves)
-# Console().print(table)
+dicodeck = {pokemon: index for (pokemon, index) in enumerate(deck)}
+print(dicodeck)
 
-Console().print(zubat)
+dicotest = {chiffre: (deck.index(chiffre)+1) for chiffre in deck}
+print(dicotest)
+
+# convdeck = [str(pokemon) for pokemon in deck]
+# print(convdeck)
+# strdeck = "\n".join(convdeck)
+# print(strdeck)
+
+#Console().print(zubat)
+#Console().print(slowpoke)
+# print(zubat.damage(slowpoke,leechlife))
+# print(zubat.damage(slowpoke,leechlife))
+# print(zubat.damage(slowpoke,leechlife))
+
+# wild = [slowpoke]
+# attacker = random.choice(wild)
+# print("*****DUEL****")
+# print(f"Vous êtes attaqué par {attacker}")
+# print(f"Vos pokemons disponibles:\n {strdeck}")
+# defendant = input(f"\nQuel pokemon choisis-tu pour te battre contre {attacker}?\n")
+# while defendant not in convdeck:
+#     defendant = input("Choisis un pokemon de ton deck stp\n")
+# print(f"Tu as choisi {defendant} pour te battre contre {attacker}")
+# print("Place au combat")
+# print("Tes attaques: ")

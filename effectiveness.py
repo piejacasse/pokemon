@@ -21,6 +21,24 @@ data = [
 
 headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
 
+dico_3 = {}
+
+def dicodico(index):
+    dico = {}
+    ligne = data[index]
+    # for y in ligne:
+    #     valeur = y
+    zipo = zip(headers, ligne)
+    for h,l in zipo:
+        dico[h]=l
+    return dico
+
+for line in range(len(data)):
+    dico_3[headers[line]]=dicodico(line)
+
+Console().print(dico_3)
+
+
 # defending = {}
 # attacking = {}
 # for pouic in range(len(data)):
@@ -38,21 +56,27 @@ headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fir
 # print(f"attacking:\n{attacking}")
 # Console().print(attacking)
 
-defending = {}
-attacking = {}
-for pouic in range(len(data)):
-    ligne = data[pouic]
-    print(f"###NOUVELLE LIGNE####:{ligne}")
-    for nombre in range(len(ligne)):
-        print(f"ligne:{ligne}")
-        key = headers[nombre]
-        value = ligne[nombre]
-        defending[key] = value
-        print(f"defending:{defending}")
-        key = headers[nombre]
-        value = defending
-        attacking[key] = value
-    #on ne veut pas tout le tableau mais juste une ligne avec son type, qu'on ajoutera au dico à chaque loop
-    print(f"attacking:{attacking}")
+# defending = {}
+# attacking = {}
+# effect = []
 
-# print(f"attacking:\n{attacking}")
+# for pouic in range(len(data)):
+#     ligne = data[pouic]
+#     attacking = {}
+#     print(f"###NOUVELLE LIGNE####:{ligne}")
+#     for nombre in range(len(ligne)):
+#         print(f"ligne:{ligne}")
+#         key = headers[nombre]
+#         value = ligne[nombre]
+#         defending[key] = value
+#         print(f"defending:{defending}")
+#     key = headers[pouic]
+#     value = defending
+#     attacking[key] = value
+#     effect.append(attacking)
+#     Console().print(f"attacking:{attacking}")
+#     Console().print(effect)
+#     #on ne veut pas tout le tableau mais juste une ligne avec son type, qu'on ajoutera au dico à chaque loop
+# print(f"FIN attacking:\n{attacking}")
+
+

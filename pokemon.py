@@ -212,6 +212,34 @@ confusion = Move(name="Confusion", type="Psychic", category="Special", power=50)
 
 psychic = Move(name="Psychic", type="Psychic", category="Special", power=90)
 
+tackle = Move(name="Tackle", type="Normal", category="Physical", power=35)
+
+vinewhip = Move(name="Vine Whip", type="Grass", category="Special", power=35)
+
+razorleaf = Move(name="Razor Leaf", type="Grass", category="Special", power=55)
+
+solarbeam = Move(name="Solar Beam", type="Grass", category="Special", power=120)
+
+doubleedge = Move(name="Double Edge", type="Normal", category="Physical", power=100)
+
+quickattack = Move(name="Quick Attack", type="Normal", category="Physical", power=40)
+
+rage = Move(name="Rage", type="Normal", category="Physical", power=20)
+
+earthquake = Move(name="Earthquake", type="Ground", category="Physical", power=100)
+
+rockslide = Move(name="Rock Slide", type="Rock", category="Physical", power=75)
+
+bodyslam = Move(name="Body Slam", type="Normal", category="Physical", power=85)
+
+stomp = Move(name="Stomp", type="Normal", category="Physical", power=65)
+
+slash = Move(name="Slash", type="Normal", category="Physical", power=70)
+
+thundershock = Move(name="Thunder Shock", type="Electric", category="Special", power=45)
+
+thunderwave = Move(name="Thunder Wave", type="Electric", category="Physical", power=65)
+
 #**************************
 #*********POKEMONS*********
 #**************************
@@ -220,7 +248,17 @@ zubat = Pokemon(name="Zubat", type=["Poison", "Flying"], stats={"Health": 40, "A
 
 slowpoke = Pokemon(name="Slowpoke", type=["Water", "Psychic"], stats={"Health": 90, "Attack": 65, "Defense": 65, "Special Attack": 40, "Special Defense": 40, "Speed": 15}, moves=[headbutt, confusion, watergun, psychic])
 
-#bulbasaur = Pokemon(name="Bulbasaur", type=["Grass", "Poison"], stats={"Health": 45, "Attack": 49, "Defense": 49, "Special Attack": 65, "Special Defense": 65, "Speed": 45}, moves=[tackle, vinewhip, razorleaf, solarbeam])
+bulbasaur = Pokemon(name="Bulbasaur", type=["Grass", "Poison"], stats={"Health": 45, "Attack": 49, "Defense": 49, "Special Attack": 65, "Special Defense": 65, "Speed": 45}, moves=[tackle, vinewhip, razorleaf, solarbeam])
+
+pidgey = Pokemon(name="Pidgey", type=["Normal", "Flying"], stats={"Health": 40, "Attack": 45, "Defense": 40, "Special Attack": 35, "Special Defense": 35, "Speed": 56}, moves=[doubleedge, quickattack, wingattack, rage])
+
+venonat = Pokemon(name="Venonat", type=["Bug", "Poison"], stats={"Health": 60, "Attack": 55, "Defense": 50, "Special Attack": 40, "Special Defense": 40, "Speed": 45}, moves=[psychic, megadrain, doubleedge, tackle])
+
+rhyhorn = Pokemon(name="Rhyhorn", type=["Ground", "Rock"], stats={"Health": 80, "Attack": 85, "Defense": 95, "Special Attack": 30, "Special Defense": 30, "Speed": 25}, moves=[earthquake, rockslide, bodyslam, stomp])
+
+farfetchd = Pokemon(name="Farfetch'd", type=["Normal", "Flying"], stats={"Health": 52, "Attack": 65, "Defense": 55, "Special Attack": 58, "Special Defense": 58, "Speed": 60}, moves=[bodyslam, slash, bodyslam, stomp])
+
+magnemite = Pokemon(name="Magnemite", type=["Electric", "Steel"], stats={"Health": 25, "Attack": 35, "Defense": 70, "Special Attack": 95, "Special Defense": 95, "Speed": 45}, moves=[thundershock, thunderwave, slash, rage])
 
 ###########################################
 ########TYPE EFFECTIVENESS TABLE###########
@@ -287,35 +325,6 @@ dicotest = {chiffre: (deck.index(chiffre)+1) for chiffre in deck}
 ###################JEU#####################
 ###########################################
 
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,leechlife))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-print(zubat.damage(slowpoke,bite))
-
-Console().print(zubat)
-Console().print(slowpoke)
-
 # wild = [zubat]
 # foe = random.choice(wild)
 # print("*****DUEL****")
@@ -327,14 +336,28 @@ Console().print(slowpoke)
 # print(f"Tu as choisi {defendant} pour te battre contre {attacker}")
 # print("Place au combat")
 # print("Tes attaques: ")
+# print(f"Foe {foe} used ")
 
 questions = [
   inquirer.List('your_pokemon',
                 message="Select your Pokémon",
-                choices=['Zubat', 'Slowpoke','Charmander','Bulbasaur'],
+                choices=[zubat, slowpoke, pidgey, bulbasaur],
             ),
 ]
 
 answers = inquirer.prompt(questions)
 
-print(answers)
+your_pokemon = answers['your_pokemon']
+
+questions_2 = [
+  inquirer.List('your_choice',
+                message=f"What will {your_pokemon} do?",
+                choices=your_pokemon.moves,
+            ),
+]
+
+answers = inquirer.prompt(questions_2)
+
+
+print(f"{answers['your_pokemon'].upper()} used !")
+

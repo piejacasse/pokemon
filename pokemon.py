@@ -3,6 +3,7 @@ from rich.console import Console, ConsoleOptions, RenderResult
 from rich.table import Table
 import random
 import math
+import inquirer
 
 class Pokemon:
     """A class to represent a pokemon
@@ -110,14 +111,26 @@ class Pokemon:
         ]
 
         headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
-        effectiveness = pandas.DataFrame(data, headers, headers)
+        
+        #effectiveness = pandas.DataFrame(data, headers, headers)
+
+        effect = {}
+
+        for i in range(len(data)):
+            bytype = {}
+            line = data[i]
+            for value in range(len(headers)):
+                key = headers[value]
+                value = line[value]
+                bytype[key] = value
+            key = headers[i]
+            effect[key] = bytype    
 
         level = 1
 
         critical = 1
         if random.choice(range(0, 255, 1)) < self.stats.get('Speed') / 2:
             critical = (2 * level * self.stats.get('Attack') + 5) / (level + 5)
-            print("Critical!")
 
         attack = 1
         if move.category == 'Physical':
@@ -129,7 +142,7 @@ class Pokemon:
         if move.category == 'Physical':
             target.stats.get('Defense')
         if move.category == 'Special':
-            defense = target.stats.get('Special ADefense')
+            defense = target.stats.get('Special Defense')
 
         power = move.power
 
@@ -138,13 +151,20 @@ class Pokemon:
             stab = 1.5
 
         #For targets that have multiple types, the type effectiveness of a move is the product of its effectiveness against each of the types
-        type1 = effectiveness.loc[self.type[0], target.type[0]].squeeze() * effectiveness.loc[self.type[0], target.type[1]].squeeze()
+        
+        #type1 = effectiveness.loc[self.type[0], target.type[0]].squeeze() * effect.loc[self.type[0], target.type[1]].squeeze()
 
-        type2 = effectiveness.loc[self.type[1], target.type[0]].squeeze() * effectiveness.loc[self.type[0], target.type[1]].squeeze()
+        #type2 = effectiveness.loc[self.type[1], target.type[0]].squeeze() * effect.loc[self.type[0], target.type[1]].squeeze()
+        
+        type1 = effect[self.type[0]][target.type[0]] * effect[self.type[0]][target.type[1]]
+
+        type2 = effect[self.type[1]][target.type[0]] * effect[self.type[0]][target.type[1]]
         
         randomnb = random.choice(range(217, 255, 1)) / 255
 
         return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * stab * type1 * type2 * randomnb
+
+
 
 class Move:
     """A class to represent a move to be performed by a Pokemon"""
@@ -200,37 +220,47 @@ zubat = Pokemon(name="Zubat", type=["Poison", "Flying"], stats={"Health": 40, "A
 
 slowpoke = Pokemon(name="Slowpoke", type=["Water", "Psychic"], stats={"Health": 90, "Attack": 65, "Defense": 65, "Special Attack": 40, "Special Defense": 40, "Speed": 15}, moves=[headbutt, confusion, watergun, psychic])
 
-#print(pandas.DataFrame.from_dict(zubat.__dict__, orient='index').transpose().to_string())
+#bulbasaur = Pokemon(name="Bulbasaur", type=["Grass", "Poison"], stats={"Health": 45, "Attack": 49, "Defense": 49, "Special Attack": 65, "Special Defense": 65, "Speed": 45}, moves=[tackle, vinewhip, razorleaf, solarbeam])
 
 ###########################################
 ########TYPE EFFECTIVENESS TABLE###########
 ###########################################
 
-# data = [
-# [1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
-# [2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
-# [1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
-# [1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
-# [1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
-# [0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
-# [1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
-# [0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
-# [1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
-# [1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
-# [1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
-# [1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
-# [1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
-# [1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
-# [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
-# ]
+data = [
+[1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
+[2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
+[1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
+[1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
+[1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
+[0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
+[1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
+[0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
+[1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
+[1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
+[1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
+[1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
+[1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
+[1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+]
 
-# headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
-# effectiveness = pandas.DataFrame(data, headers, headers)
-#print(effectiveness)
-#print(effectiveness.to_string())
+headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
+effectiveness = pandas.DataFrame(data, headers, headers)
+
+effect = {}
+
+for i in range(len(data)):
+    bytype = {}
+    line = data[i]
+    for value in range(len(headers)):
+        key = headers[value]
+        value = line[value]
+        bytype[key] = value
+    key = headers[i]
+    effect[key] = bytype    
 
 ###########################################
-####################JEU####################
+##########NUMERORATION DECK################
 ###########################################
 dicodeck = {}
 deck = [zubat, "poupou", "loulou"]
@@ -240,29 +270,56 @@ print(dicodeck)
 
 decknum = [f"{number} {pokemon}" for number,pokemon in enumerate(deck)]
 strdeck = "\n".join(decknum)
-print(strdeck)
+#print(strdeck)
 
 dicodeck = {pokemon: index for (pokemon, index) in enumerate(deck)}
-print(dicodeck)
+#print(dicodeck)
 
 dicotest = {chiffre: (deck.index(chiffre)+1) for chiffre in deck}
-print(dicotest)
+#print(dicotest)
 
 # convdeck = [str(pokemon) for pokemon in deck]
 # print(convdeck)
 # strdeck = "\n".join(convdeck)
 # print(strdeck)
 
-#Console().print(zubat)
-#Console().print(slowpoke)
-# print(zubat.damage(slowpoke,leechlife))
-# print(zubat.damage(slowpoke,leechlife))
-# print(zubat.damage(slowpoke,leechlife))
+###########################################
+###################JEU#####################
+###########################################
 
-# wild = [slowpoke]
-# attacker = random.choice(wild)
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,leechlife))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+print(zubat.damage(slowpoke,bite))
+
+Console().print(zubat)
+Console().print(slowpoke)
+
+# wild = [zubat]
+# foe = random.choice(wild)
 # print("*****DUEL****")
-# print(f"Vous êtes attaqué par {attacker}")
+# print(f"Wild {foe} appeared")
 # print(f"Vos pokemons disponibles:\n {strdeck}")
 # defendant = input(f"\nQuel pokemon choisis-tu pour te battre contre {attacker}?\n")
 # while defendant not in convdeck:
@@ -270,3 +327,14 @@ print(dicotest)
 # print(f"Tu as choisi {defendant} pour te battre contre {attacker}")
 # print("Place au combat")
 # print("Tes attaques: ")
+
+questions = [
+  inquirer.List('your_pokemon',
+                message="Select your Pokémon",
+                choices=['Zubat', 'Slowpoke','Charmander','Bulbasaur'],
+            ),
+]
+
+answers = inquirer.prompt(questions)
+
+print(answers)

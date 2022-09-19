@@ -1,9 +1,82 @@
+from re import A
 import pandas
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.table import Table
 import random
 import math
 import inquirer
+
+class Move:
+    """A class to represent a move to be performed by a Pokemon"""
+    def __init__(self, name, type, category, power):
+        """Initializes Move objects attributes
+        
+        Args:
+            name(str): name of the move
+            type(str): type of the move
+            category(str): move can be 'physical', 'special', or 'status'
+            power(int): attack power    
+        
+        Returns:
+            None
+        """
+        self.name = name
+        self.type = type
+        self.category = category
+        self.power = power
+
+    def __repr__(self):
+        """Defines string representation of Move objects"""
+        return self.name.upper()
+
+    # def __repr__(self):
+    #     return pandas.Series(self.__dict__).to_string()
+
+
+    def effectiveness(self, target):
+
+        data = [
+        [1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
+        [2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
+        [1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
+        [1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
+        [1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
+        [0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
+        [1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
+        [0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
+        [1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
+        [1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
+        [1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
+        [1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
+        [1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
+        [1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+        ]
+
+        headers = ['Normal','Fight','Flying','Poison','Ground','Rock','Bug','Ghost','Fire','Water','Grass','Electric','Psychic','Ice','Dragon']
+        
+        effect = {}
+
+        for i in range(len(data)):
+            bytype = {}
+            line = data[i]
+            for value in range(len(headers)):
+                key = headers[value]
+                value = line[value]
+                bytype[key] = value
+            key = headers[i]
+            effect[key] = bytype
+
+
+        #####################################################################################################################################
+        #for targets that have multiple types, the type effectiveness of a move is the product of its effectiveness against each of the types
+        #####################################################################################################################################
+
+        if type(target.type) == list:
+            return effect[self.type][target.type[0]] * effect[self.type][target.type[1]]
+
+        else:
+            return effect[self.type][target.type]
 
 class Pokemon:
     """A class to represent a pokemon
@@ -77,7 +150,8 @@ class Pokemon:
         # table = Table("Name", "Type", "Health", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Moves")
         # table.add_row(zubat.name, strtype, f"{zubat.stats.get('Health')}", f"{zubat.stats.get('Attack')}", f"{zubat.stats.get('Defense')}", f"{zubat.stats.get('Special Attack')}", f"{zubat.stats.get('Special Defense')}", f"{zubat.stats.get('Speed')}", strmoves)
         # return table
-        return self.name
+        return self.name.upper()
+
 
     def damage(self, target, move):
         """
@@ -92,44 +166,43 @@ class Pokemon:
             int: points of damage done to the target
         """
 
-        data = [
-        [1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
-        [2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
-        [1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
-        [1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
-        [1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
-        [0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
-        [1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
-        [0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
-        [1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
-        [1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
-        [1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
-        [1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
-        [1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
-        [1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
-        ]
+        # data = [
+        # [1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
+        # [2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
+        # [1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
+        # [1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
+        # [1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
+        # [0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
+        # [1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
+        # [0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
+        # [1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
+        # [1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
+        # [1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
+        # [1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
+        # [1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
+        # [1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
+        # [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+        # ]
 
-        headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
+        # headers = ['Normal','Fight','Flying','Poison','Ground','Rock','Bug','Ghost','Fire','Water','Grass','Electric','Psychic','Ice','Dragon']
         
-        #effectiveness = pandas.DataFrame(data, headers, headers)
+        # effect = {}
 
-        effect = {}
-
-        for i in range(len(data)):
-            bytype = {}
-            line = data[i]
-            for value in range(len(headers)):
-                key = headers[value]
-                value = line[value]
-                bytype[key] = value
-            key = headers[i]
-            effect[key] = bytype    
+        # for i in range(len(data)):
+        #     bytype = {}
+        #     line = data[i]
+        #     for value in range(len(headers)):
+        #         key = headers[value]
+        #         value = line[value]
+        #         bytype[key] = value
+        #     key = headers[i]
+        #     effect[key] = bytype    
 
         level = 1
 
         critical = 1
         if random.choice(range(0, 255, 1)) < self.stats.get('Speed') / 2:
+            print('A critical hit!')
             critical = (2 * level * self.stats.get('Attack') + 5) / (level + 5)
 
         attack = 1
@@ -146,51 +219,38 @@ class Pokemon:
 
         power = move.power
 
-        stab = 1
+        STAB = 1
         if move.type in self.type:
-            stab = 1.5
+            STAB = 1.5
 
-        #For targets that have multiple types, the type effectiveness of a move is the product of its effectiveness against each of the types
+        nbrandom = random.choice(range(217, 255, 1)) / 255
+
+        #####################################################################################################################################
+        #for targets that have multiple types, the type effectiveness of a move is the product of its effectiveness against each of the types
+        #####################################################################################################################################
         
         #type1 = effectiveness.loc[self.type[0], target.type[0]].squeeze() * effect.loc[self.type[0], target.type[1]].squeeze()
 
         #type2 = effectiveness.loc[self.type[1], target.type[0]].squeeze() * effect.loc[self.type[0], target.type[1]].squeeze()
+
+        #type1 = effect[self.type[0]][target.type[0]] * effect[self.type[0]][target.type[1]]
+        #type2 = effect[self.type[1]][target.type[0]] * effect[self.type[0]][target.type[1]]
+        #return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * STAB * type1 * type2 * nbrandom
         
-        type1 = effect[self.type[0]][target.type[0]] * effect[self.type[0]][target.type[1]]
+        # type1 = effect[move.type][target.type[0]]
+        # print(type1)
 
-        type2 = effect[self.type[1]][target.type[0]] * effect[self.type[0]][target.type[1]]
-        
-        randomnb = random.choice(range(217, 255, 1)) / 255
+        # type2 = effect[move.type][target.type[1]]
+        # print(type2)
 
-        return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * stab * type1 * type2 * randomnb
+        print(move.effectiveness(target))
+        if move.effectiveness(target) > 2:
+            print(("It's super effective!"))
+        if move.effectiveness(target) < 1:
+            print(("It's not very effective..."))
 
+        return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * STAB * move.effectiveness(target) * nbrandom
 
-
-class Move:
-    """A class to represent a move to be performed by a Pokemon"""
-    def __init__(self, name, type, category, power):
-        """Initializes Move objects attributes
-        
-        Args:
-            name(str): name of the move
-            type(str): type of the move
-            category(str): move can be 'physical', 'special', or 'status'
-            power(int): attack power    
-        
-        Returns:
-            None
-        """
-        self.name = name
-        self.type = type
-        self.category = category
-        self.power = power
-
-    def __repr__(self):
-        """Defines string representation of Move objects"""
-        return self.name
-
-    # def __repr__(self):
-    #     return pandas.Series(self.__dict__).to_string()
 
 #**************************
 #**********MOVES***********
@@ -240,7 +300,17 @@ thundershock = Move(name="Thunder Shock", type="Electric", category="Special", p
 
 thunderwave = Move(name="Thunder Wave", type="Electric", category="Physical", power=65)
 
+acid = Move(name="Acid", type="Poison", category="Physical", power=40)
+
+poisonsting = Move(name="Poison Sting", type="Poison", category="Physical", power=15)
+
+constrict = Move(name="Constrict", type="Normal", category="Physical", power=10)
+
+bubblebeam = Move(name="Bubble Beam", type="Water", category="Special", power=65)
+
+
 #**************************
+
 #*********POKEMONS*********
 #**************************
 
@@ -260,42 +330,7 @@ farfetchd = Pokemon(name="Farfetch'd", type=["Normal", "Flying"], stats={"Health
 
 magnemite = Pokemon(name="Magnemite", type=["Electric", "Steel"], stats={"Health": 25, "Attack": 35, "Defense": 70, "Special Attack": 95, "Special Defense": 95, "Speed": 45}, moves=[thundershock, thunderwave, slash, rage])
 
-###########################################
-########TYPE EFFECTIVENESS TABLE###########
-###########################################
-
-data = [
-[1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
-[2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
-[1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
-[1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
-[1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
-[0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
-[1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
-[0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
-[1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
-[1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
-[1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
-[1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
-[1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
-[1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
-]
-
-headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
-effectiveness = pandas.DataFrame(data, headers, headers)
-
-effect = {}
-
-for i in range(len(data)):
-    bytype = {}
-    line = data[i]
-    for value in range(len(headers)):
-        key = headers[value]
-        value = line[value]
-        bytype[key] = value
-    key = headers[i]
-    effect[key] = bytype    
+tentacool = Pokemon(name="Tentacool", type=["Water", "Poison"], stats={"Health": 40, "Attack": 40, "Defense": 35, "Special Attack": 100, "Special Defense": 100, "Speed": 70}, moves=[acid, poisonsting, constrict, bubblebeam])
 
 ###########################################
 ##########NUMERORATION DECK################
@@ -304,7 +339,6 @@ dicodeck = {}
 deck = [zubat, "poupou", "loulou"]
 for pokemon in range(len(deck)):
     dicodeck[pokemon] = deck[pokemon]
-print(dicodeck)
 
 decknum = [f"{number} {pokemon}" for number,pokemon in enumerate(deck)]
 strdeck = "\n".join(decknum)
@@ -322,42 +356,52 @@ dicotest = {chiffre: (deck.index(chiffre)+1) for chiffre in deck}
 # print(strdeck)
 
 ###########################################
-###################JEU#####################
+###################GAME####################
 ###########################################
 
-# wild = [zubat]
-# foe = random.choice(wild)
-# print("*****DUEL****")
-# print(f"Wild {foe} appeared")
-# print(f"Vos pokemons disponibles:\n {strdeck}")
-# defendant = input(f"\nQuel pokemon choisis-tu pour te battre contre {attacker}?\n")
-# while defendant not in convdeck:
-#     defendant = input("Choisis un pokemon de ton deck stp\n")
-# print(f"Tu as choisi {defendant} pour te battre contre {attacker}")
-# print("Place au combat")
-# print("Tes attaques: ")
-# print(f"Foe {foe} used ")
+wild_pokemons = [rhyhorn, magnemite, slowpoke]
 
-questions = [
-  inquirer.List('your_pokemon',
-                message="Select your Pokémon",
-                choices=[zubat, slowpoke, pidgey, bulbasaur],
+my_pokemons = [bulbasaur, farfetchd, zubat, venonat, tentacool, pidgey]
+
+foe = random.choice(wild_pokemons)
+
+print('!!!\n')
+
+print(f"Wild {foe} appeared!\n")
+
+print(f"Go! {my_pokemons[0]}!\n")
+
+# questions = [
+#   inquirer.List('your_pokemon',
+#                 message="Select your Pokémon",
+#                 choices=my_pokemons,
+#             ),
+# ]
+# your_pokemon = answers['your_pokemon']
+# answers = inquirer.prompt(questions)
+
+question_1 = [
+  inquirer.List('choice',
+                message=f"What should {my_pokemons[0]} do?",
+                choices=['Fight', 'Pokémons', 'Run'],
             ),
 ]
 
-answers = inquirer.prompt(questions)
+answers = inquirer.prompt(question_1)
 
-your_pokemon = answers['your_pokemon']
+print(f"Foe {foe} used {random.choice(foe.moves)}\n")
 
-questions_2 = [
-  inquirer.List('your_choice',
-                message=f"What will {your_pokemon} do?",
-                choices=your_pokemon.moves,
-            ),
-]
+# questions_2 = [
+#   inquirer.List('your_choice',
+#                 message=f"What should {your_pokemon} do?",
+#                 choices=your_pokemon.moves,
+#             ),
+# ]
 
-answers = inquirer.prompt(questions_2)
+# answers = inquirer.prompt(questions_2)
 
 
-print(f"{answers['your_pokemon'].upper()} used !")
+# print(f"{answers['your_pokemon'].upper()} used !")
 
+#wprint("TRAINER CHRISTINA would like to battle!")
+#wprint("TRAINER CHRISTINA send out ")

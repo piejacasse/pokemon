@@ -6,6 +6,28 @@ import random
 import math
 import inquirer
 
+<<<<<<< HEAD
+from datetime import datetime
+
+from rich import box
+from rich.align import Align
+from rich.console import Console, Group
+from rich.layout import Layout
+from rich.panel import Panel
+from rich.progress_bar import ProgressBar
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, MofNCompleteColumn
+from rich.table import Table
+
+import time
+
+from rich.live import Live
+from rich.table import Table
+
+console = Console()
+
+
+=======
+>>>>>>> 445028a69f00052173d79d7c895b47febda34d03
 class Move:
     """A class to represent a move to be performed by a Pokemon"""
     def __init__(self, name, type, category, power):
@@ -249,7 +271,12 @@ class Pokemon:
         if move.effectiveness(target) < 1:
             print(("It's not very effective..."))
 
+<<<<<<< HEAD
+        #return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * STAB * move.effectiveness(target) * nbrandom
+        return round(((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * STAB * move.effectiveness(target) * nbrandom)
+=======
         return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * STAB * move.effectiveness(target) * nbrandom
+>>>>>>> 445028a69f00052173d79d7c895b47febda34d03
 
 
 #**************************
@@ -328,8 +355,35 @@ rhyhorn = Pokemon(name="Rhyhorn", type=["Ground", "Rock"], stats={"Health": 80, 
 
 farfetchd = Pokemon(name="Farfetch'd", type=["Normal", "Flying"], stats={"Health": 52, "Attack": 65, "Defense": 55, "Special Attack": 58, "Special Defense": 58, "Speed": 60}, moves=[bodyslam, slash, bodyslam, stomp])
 
-magnemite = Pokemon(name="Magnemite", type=["Electric", "Steel"], stats={"Health": 25, "Attack": 35, "Defense": 70, "Special Attack": 95, "Special Defense": 95, "Speed": 45}, moves=[thundershock, thunderwave, slash, rage])
+tentacool = Pokemon(name="Tentacool", type=["Water", "Poison"], stats={"Health": 40, "Attack": 40, "Defense": 35, "Special Attack": 100, "Special Defense": 100, "Speed": 70}, moves=[acid, poisonsting, constrict, bubblebeam])
 
+<<<<<<< HEAD
+###########################################
+############POKEMONS-EN-JEU################
+###########################################
+
+wild_pokemons = [rhyhorn, slowpoke]
+
+my_pokemons = [bulbasaur, farfetchd, zubat, venonat, tentacool, pidgey]
+
+###########################################
+############VALEURS DE DEPART##############
+###########################################
+
+usable_pokemons = my_pokemons
+
+fighter = my_pokemons[0]
+
+foe = random.choice(wild_pokemons)
+
+hp_foe = foe.stats.get('Health')
+
+hp_fighter = fighter.stats.get('Health')
+
+###########################################
+###################COMBAT##################
+###########################################
+=======
 tentacool = Pokemon(name="Tentacool", type=["Water", "Poison"], stats={"Health": 40, "Attack": 40, "Defense": 35, "Special Attack": 100, "Special Defense": 100, "Speed": 70}, moves=[acid, poisonsting, constrict, bubblebeam])
 
 ###########################################
@@ -399,9 +453,213 @@ print(f"Foe {foe} used {random.choice(foe.moves)}\n")
 # ]
 
 # answers = inquirer.prompt(questions_2)
+>>>>>>> 445028a69f00052173d79d7c895b47febda34d03
 
+print(f"Wild {foe} appeared!\n")
 
+<<<<<<< HEAD
+print(f"Go! {fighter}!\n")
+
+while hp_fighter > 0 and hp_foe > 0: 
+
+    choice_action = [
+    inquirer.List('action',
+                    message=f"What should {fighter} do?",
+                    choices=['Fight', 'Pokémons', 'Run'],
+                ),
+    ]
+
+    choice_action = inquirer.prompt(choice_action)
+
+    if choice_action['action'] == 'Fight':
+        choice_move = [
+        inquirer.List('move',
+                        message=f"What should {fighter} do?",
+                        choices=fighter.moves,
+                    ),
+        ]
+        
+        choice_move = inquirer.prompt(choice_move)
+        print(f"{fighter} used {choice_move['move']}!")
+        print(fighter.damage(foe,choice_move['move']))
+
+        print(f"--- hp du foe avant: {hp_foe}")
+        hp_foe = hp_foe - fighter.damage(foe,choice_move['move'])
+        print(f"--- hp du foe après: {hp_foe}")
+
+    if choice_action['action'] == 'Pokémons':
+        choice_pokemon = [
+        inquirer.List('pokemon',
+                        message=f"Choose a Pokémon",
+                        choices=my_pokemons,
+                    ),
+        ]
+
+        choice_pokemon = inquirer.prompt(choice_pokemon)
+        fighter = choice_pokemon['pokemon']
+
+    # à compléter
+    if choice_action['action'] == 'Run':
+        print("You can't run")
+
+    foe_move = random.choice(foe.moves)
+    print(f"Foe {foe} used {foe_move}")
+    print(f"--- hp du fighter avant: {hp_fighter}")
+    hp_fighter = hp_fighter - foe.damage(fighter,foe_move)
+    print(f"--- hp du fighter après: {hp_fighter}")
+
+# print(f"{answers['your_pokemon'].upper()} used !")
+# print("TRAINER CHRISTINA would like to battle!")
+# print("TRAINER CHRISTINA send out ")
+
+#fin de la boucle while
+if hp_foe <= 0:
+    print(f"Wild {foe} fainted!\n")
+else:
+    print(usable_pokemons)
+    print(f"{fighter} fainted!\n")
+    usable_pokemons.remove(fighter)
+    print(usable_pokemons)
+
+###########################################
+################INTERFACE##################
+###########################################
+
+layout = Layout(name="root")
+
+layout.split(
+    Layout(name="pokemons"),
+    Layout(name="messages"),
+)
+layout["pokemons"].split_column(
+    Layout(name="foe"),
+    Layout(name="player"),
+)
+layout["foe"].split_row(
+    Layout(name="hp", ratio=2),
+    Layout(name="name"),
+)
+
+layout["player"].split_row(
+    Layout(name="name"),
+    Layout(name="hp", ratio=2),
+)
+
+layout["pokemons"].size = 10
+layout["messages"].size = 8
+
+hp_progress_foe = Progress(
+    "{task.description}",
+    SpinnerColumn(),
+    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+    BarColumn(),
+)
+
+hp_progress_player = Progress(
+    "{task.description}",
+    SpinnerColumn(),
+    BarColumn(),
+    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+    MofNCompleteColumn(separator='/', table_column=None),
+)
+
+hp_progress_foe.add_task("[magenta]HP")
+hp_progress_player.add_task("[red]HP", total=200)
+
+progress_table_player = Table.grid(expand=True)
+progress_table_player.add_row(
+    Panel(hp_progress_player, border_style="green", padding=(1, 2))
+)
+
+progress_table_foe = Table.grid(expand=True)
+progress_table_foe.add_row(
+    Panel(hp_progress_foe, border_style="magenta", padding=(1, 2))
+)
+
+pokemon_name = Table.grid(padding=1, expand=True)
+pokemon_name.add_column(style="b cyan2", justify="left")
+pokemon_name.add_column(style="b magenta")
+pokemon_name.add_column(style="b plum1", justify="right")
+pokemon_name.add_row(
+    "Zubat",
+    "|",
+    "Lvl:1",
+)
+
+pokemon_name_panel = Panel(pokemon_name, border_style="red", padding=(1, 2)#, height=5
+)
+
+pokemon_panel_foe = Table.grid(padding=1, expand=True)
+pokemon_panel_foe.add_column(style="b magenta", ratio=1)
+pokemon_panel_foe.add_column(justify="right", style="b cyan", ratio=2)
+pokemon_panel_foe.add_row(
+    pokemon_name_panel,
+    progress_table_foe,
+)
+
+pokemon_panel_player = Table.grid(padding=1, expand=True)
+pokemon_panel_player.add_column(style="b magenta", ratio=2)
+pokemon_panel_player.add_column(justify="right", style="b cyan", ratio=1)
+pokemon_panel_player.add_row(
+    progress_table_player,
+    pokemon_name_panel,
+)
+
+def print_message(message):
+    instructions = Table.grid(padding=1, expand=True)
+    instructions.add_row(message)
+
+    message_panel = Panel(instructions,
+    box=box.ROUNDED,
+    padding=(1, 2),
+    title="[b orange1]message panel",
+    border_style="cyan")
+
+    return message_panel
+
+# message = "#######"
+# instructions = Table.grid(padding=1, expand=True)
+# instructions.add_row(message)
+
+# message_panel = Panel(instructions,
+#     box=box.ROUNDED,
+#     padding=(1, 2),
+#     title="[b orange1]message panel",
+#     border_style="cyan")
+
+interface = Panel(
+        Align.center(
+            Group(pokemon_panel_foe,pokemon_panel_player, print_message("###")),
+            vertical="middle",
+        ),
+        box=box.DOUBLE,
+        padding=(1, 2),
+        title="[b blue_violet]POKEMON GAME",
+        title_align='right',
+        border_style="blue_violet",
+    )
+
+interface_layout = Panel(
+        layout,
+        box=box.DOUBLE,
+        padding=(1, 1),
+        title="[b blue_violet]POKEMON GAME",
+        title_align='right',
+        border_style="blue_violet",
+        width=80,
+        height=22,
+    )
+
+layout["messages"].update(print_message("WILD POKEMON"))
+layout["pokemons"]["foe"]["hp"].update(progress_table_foe)
+layout["pokemons"]["foe"]["name"].update(pokemon_name_panel)
+layout["pokemons"]["player"]["hp"].update(progress_table_player)
+layout["pokemons"]["player"]["name"].update(pokemon_name_panel)
+
+layout["messages"].update(print_message("ZUBAT ATTACK"))
+=======
 # print(f"{answers['your_pokemon'].upper()} used !")
 
 #wprint("TRAINER CHRISTINA would like to battle!")
 #wprint("TRAINER CHRISTINA send out ")
+>>>>>>> 445028a69f00052173d79d7c895b47febda34d03

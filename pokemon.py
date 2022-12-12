@@ -5,6 +5,97 @@ import random
 import math
 import inquirer
 
+from datetime import datetime
+
+from rich import box
+from rich.align import Align
+from rich.console import Console, Group
+from rich.layout import Layout
+from rich.panel import Panel
+from rich.progress_bar import ProgressBar
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, MofNCompleteColumn
+from rich.table import Table
+
+import time
+
+from rich.live import Live
+from rich.table import Table
+
+console = Console()
+
+
+class Move:
+    """A class to represent a move to be performed by a Pokemon"""
+    def __init__(self, name, type, category, power):
+        """Initializes Move objects attributes
+        
+        Args:
+            name(str): name of the move
+            type(str): type of the move
+            category(str): move can be 'physical', 'special', or 'status'
+            power(int): attack power    
+        
+        Returns:
+            None
+        """
+        self.name = name
+        self.type = type
+        self.category = category
+        self.power = power
+
+    def __repr__(self):
+        """Defines string representation of Move objects"""
+        return self.name.upper()
+
+    # def __repr__(self):
+    #     return pandas.Series(self.__dict__).to_string()
+
+
+    def effectiveness(self, target):
+
+        data = [
+        [1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
+        [2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
+        [1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
+        [1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
+        [1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
+        [0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
+        [1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
+        [0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
+        [1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
+        [1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
+        [1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
+        [1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
+        [1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
+        [1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+        ]
+
+        headers = ['Normal','Fight','Flying','Poison','Ground','Rock','Bug','Ghost','Fire','Water','Grass','Electric','Psychic','Ice','Dragon']
+        
+        effect = {}
+
+        for i in range(len(data)):
+            bytype = {}
+            line = data[i]
+            for value in range(len(headers)):
+                key = headers[value]
+                value = line[value]
+                bytype[key] = value
+            key = headers[i]
+            effect[key] = bytype
+
+
+        #####################################################################################################################################
+        #for targets that have multiple types, the type effectiveness of a move is the product of its effectiveness against each of the types
+        #####################################################################################################################################
+
+        if type(target.type) == list:
+            return effect[self.type][target.type[0]] * effect[self.type][target.type[1]]
+
+        else:
+            return effect[self.type][target.type]
+
 class Pokemon:
     """A class to represent a pokemon
 
@@ -77,7 +168,8 @@ class Pokemon:
         # table = Table("Name", "Type", "Health", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Moves")
         # table.add_row(zubat.name, strtype, f"{zubat.stats.get('Health')}", f"{zubat.stats.get('Attack')}", f"{zubat.stats.get('Defense')}", f"{zubat.stats.get('Special Attack')}", f"{zubat.stats.get('Special Defense')}", f"{zubat.stats.get('Speed')}", strmoves)
         # return table
-        return self.name
+        return self.name.upper()
+
 
     def damage(self, target, move):
         """
@@ -92,44 +184,43 @@ class Pokemon:
             int: points of damage done to the target
         """
 
-        data = [
-        [1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
-        [2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
-        [1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
-        [1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
-        [1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
-        [0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
-        [1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
-        [0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
-        [1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
-        [1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
-        [1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
-        [1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
-        [1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
-        [1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
-        ]
+        # data = [
+        # [1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
+        # [2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
+        # [1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
+        # [1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
+        # [1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
+        # [0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
+        # [1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
+        # [0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
+        # [1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
+        # [1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
+        # [1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
+        # [1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
+        # [1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
+        # [1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
+        # [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
+        # ]
 
-        headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
+        # headers = ['Normal','Fight','Flying','Poison','Ground','Rock','Bug','Ghost','Fire','Water','Grass','Electric','Psychic','Ice','Dragon']
         
-        #effectiveness = pandas.DataFrame(data, headers, headers)
+        # effect = {}
 
-        effect = {}
-
-        for i in range(len(data)):
-            bytype = {}
-            line = data[i]
-            for value in range(len(headers)):
-                key = headers[value]
-                value = line[value]
-                bytype[key] = value
-            key = headers[i]
-            effect[key] = bytype    
+        # for i in range(len(data)):
+        #     bytype = {}
+        #     line = data[i]
+        #     for value in range(len(headers)):
+        #         key = headers[value]
+        #         value = line[value]
+        #         bytype[key] = value
+        #     key = headers[i]
+        #     effect[key] = bytype    
 
         level = 1
 
         critical = 1
         if random.choice(range(0, 255, 1)) < self.stats.get('Speed') / 2:
+            print('A critical hit!')
             critical = (2 * level * self.stats.get('Attack') + 5) / (level + 5)
 
         attack = 1
@@ -146,51 +237,39 @@ class Pokemon:
 
         power = move.power
 
-        stab = 1
+        STAB = 1
         if move.type in self.type:
-            stab = 1.5
+            STAB = 1.5
 
-        #For targets that have multiple types, the type effectiveness of a move is the product of its effectiveness against each of the types
+        nbrandom = random.choice(range(217, 255, 1)) / 255
+
+        #####################################################################################################################################
+        #for targets that have multiple types, the type effectiveness of a move is the product of its effectiveness against each of the types
+        #####################################################################################################################################
         
         #type1 = effectiveness.loc[self.type[0], target.type[0]].squeeze() * effect.loc[self.type[0], target.type[1]].squeeze()
 
         #type2 = effectiveness.loc[self.type[1], target.type[0]].squeeze() * effect.loc[self.type[0], target.type[1]].squeeze()
+
+        #type1 = effect[self.type[0]][target.type[0]] * effect[self.type[0]][target.type[1]]
+        #type2 = effect[self.type[1]][target.type[0]] * effect[self.type[0]][target.type[1]]
+        #return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * STAB * type1 * type2 * nbrandom
         
-        type1 = effect[self.type[0]][target.type[0]] * effect[self.type[0]][target.type[1]]
+        # type1 = effect[move.type][target.type[0]]
+        # print(type1)
 
-        type2 = effect[self.type[1]][target.type[0]] * effect[self.type[0]][target.type[1]]
-        
-        randomnb = random.choice(range(217, 255, 1)) / 255
+        # type2 = effect[move.type][target.type[1]]
+        # print(type2)
 
-        return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * stab * type1 * type2 * randomnb
+        print(move.effectiveness(target))
+        if move.effectiveness(target) > 2:
+            print(("It's super effective!"))
+        if move.effectiveness(target) < 1:
+            print(("It's not very effective..."))
 
+        #return ((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * STAB * move.effectiveness(target) * nbrandom
+        return round(((((((2 * level * critical) / 5) + 2) * power * attack / defense) / 50) + 2) * STAB * move.effectiveness(target) * nbrandom)
 
-
-class Move:
-    """A class to represent a move to be performed by a Pokemon"""
-    def __init__(self, name, type, category, power):
-        """Initializes Move objects attributes
-        
-        Args:
-            name(str): name of the move
-            type(str): type of the move
-            category(str): move can be 'physical', 'special', or 'status'
-            power(int): attack power    
-        
-        Returns:
-            None
-        """
-        self.name = name
-        self.type = type
-        self.category = category
-        self.power = power
-
-    def __repr__(self):
-        """Defines string representation of Move objects"""
-        return self.name
-
-    # def __repr__(self):
-    #     return pandas.Series(self.__dict__).to_string()
 
 #**************************
 #**********MOVES***********
@@ -240,6 +319,15 @@ thundershock = Move(name="Thunder Shock", type="Electric", category="Special", p
 
 thunderwave = Move(name="Thunder Wave", type="Electric", category="Physical", power=65)
 
+acid = Move(name="Acid", type="Poison", category="Physical", power=40)
+
+poisonsting = Move(name="Poison Sting", type="Poison", category="Physical", power=15)
+
+constrict = Move(name="Constrict", type="Normal", category="Physical", power=10)
+
+bubblebeam = Move(name="Bubble Beam", type="Water", category="Special", power=65)
+
+
 #**************************
 #*********POKEMONS*********
 #**************************
@@ -258,106 +346,232 @@ rhyhorn = Pokemon(name="Rhyhorn", type=["Ground", "Rock"], stats={"Health": 80, 
 
 farfetchd = Pokemon(name="Farfetch'd", type=["Normal", "Flying"], stats={"Health": 52, "Attack": 65, "Defense": 55, "Special Attack": 58, "Special Defense": 58, "Speed": 60}, moves=[bodyslam, slash, bodyslam, stomp])
 
-magnemite = Pokemon(name="Magnemite", type=["Electric", "Steel"], stats={"Health": 25, "Attack": 35, "Defense": 70, "Special Attack": 95, "Special Defense": 95, "Speed": 45}, moves=[thundershock, thunderwave, slash, rage])
+tentacool = Pokemon(name="Tentacool", type=["Water", "Poison"], stats={"Health": 40, "Attack": 40, "Defense": 35, "Special Attack": 100, "Special Defense": 100, "Speed": 70}, moves=[acid, poisonsting, constrict, bubblebeam])
 
 ###########################################
-########TYPE EFFECTIVENESS TABLE###########
+############POKEMONS-EN-JEU################
 ###########################################
 
-data = [
-[1,1,1,1,1,1/2,1,0,1,1,1,1,1,1,1],
-[2,1,1/2,1/2,1,2,1/2,0,1,1,1,1,1/2,2,1],
-[1,2,1,1,1,1/2,2,1,1,1,2,1/2,1,1,1],
-[1,1,1,1/2,1/2,1/2,2,1/2,1,1,2,1,1,1,1],
-[1,1,0,2,1,2,1/2,1,2,1,1/2,2,1,1,1],
-[0,1/2,2,1,1/2,1,2,1,2,1,1,1,1,2,1],
-[1,1/2,1/2,2,1,1,1,1/2,1/2,1,2,1,2,1,1],
-[0,1,1,1,1,1,1,2,1,1,1,1,0,1,1],
-[1,1,1,1,1,1/2,2,1,1/2,1/2,2,1,1,2,1/2],
-[1,1,1,1,2,2,1,1,2,1/2,1/2,1,1,1,1/2],
-[1,1,1/2,1/2,2,2,1/2,1,1/2,2,1/2,1,1,1,1/2],
-[1,1,2,1,0,1,1,1,1,2,1/2,1/2,1,1,1/2],
-[1,2,1,2,1,1,1,1,1,1,1,1,1/2,1,1],
-[1,1,2,1,2,1,1,1,1,1/2,2,1,1,1/2,2],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
-]
+wild_pokemons = [rhyhorn, slowpoke]
 
-headers = ["Normal","Fight","Flying","Poison","Ground","Rock","Bug","Ghost","Fire","Water","Grass","Electric","Psychic","Ice","Dragon"]
-effectiveness = pandas.DataFrame(data, headers, headers)
-
-effect = {}
-
-for i in range(len(data)):
-    bytype = {}
-    line = data[i]
-    for value in range(len(headers)):
-        key = headers[value]
-        value = line[value]
-        bytype[key] = value
-    key = headers[i]
-    effect[key] = bytype    
+my_pokemons = [bulbasaur, farfetchd, zubat, venonat, tentacool, pidgey]
 
 ###########################################
-##########NUMERORATION DECK################
-###########################################
-dicodeck = {}
-deck = [zubat, "poupou", "loulou"]
-for pokemon in range(len(deck)):
-    dicodeck[pokemon] = deck[pokemon]
-print(dicodeck)
-
-decknum = [f"{number} {pokemon}" for number,pokemon in enumerate(deck)]
-strdeck = "\n".join(decknum)
-#print(strdeck)
-
-dicodeck = {pokemon: index for (pokemon, index) in enumerate(deck)}
-#print(dicodeck)
-
-dicotest = {chiffre: (deck.index(chiffre)+1) for chiffre in deck}
-#print(dicotest)
-
-# convdeck = [str(pokemon) for pokemon in deck]
-# print(convdeck)
-# strdeck = "\n".join(convdeck)
-# print(strdeck)
-
-###########################################
-###################JEU#####################
+############VALEURS DE DEPART##############
 ###########################################
 
-# wild = [zubat]
-# foe = random.choice(wild)
-# print("*****DUEL****")
-# print(f"Wild {foe} appeared")
-# print(f"Vos pokemons disponibles:\n {strdeck}")
-# defendant = input(f"\nQuel pokemon choisis-tu pour te battre contre {attacker}?\n")
-# while defendant not in convdeck:
-#     defendant = input("Choisis un pokemon de ton deck stp\n")
-# print(f"Tu as choisi {defendant} pour te battre contre {attacker}")
-# print("Place au combat")
-# print("Tes attaques: ")
-# print(f"Foe {foe} used ")
+usable_pokemons = my_pokemons
 
-questions = [
-  inquirer.List('your_pokemon',
-                message="Select your Pokémon",
-                choices=[zubat, slowpoke, pidgey, bulbasaur],
-            ),
-]
+fighter = my_pokemons[0]
 
-answers = inquirer.prompt(questions)
+foe = random.choice(wild_pokemons)
 
-your_pokemon = answers['your_pokemon']
+hp_foe = foe.stats.get('Health')
 
-questions_2 = [
-  inquirer.List('your_choice',
-                message=f"What will {your_pokemon} do?",
-                choices=your_pokemon.moves,
-            ),
-]
+hp_fighter = fighter.stats.get('Health')
 
-answers = inquirer.prompt(questions_2)
+###########################################
+###################COMBAT##################
+###########################################
 
+print(f"Wild {foe} appeared!\n")
 
-print(f"{answers['your_pokemon'].upper()} used !")
+print(f"Go! {fighter}!\n")
 
+while hp_fighter > 0 and hp_foe > 0: 
+
+    choice_action = [
+    inquirer.List('action',
+                    message=f"What should {fighter} do?",
+                    choices=['Fight', 'Pokémons', 'Run'],
+                ),
+    ]
+
+    choice_action = inquirer.prompt(choice_action)
+
+    if choice_action['action'] == 'Fight':
+        choice_move = [
+        inquirer.List('move',
+                        message=f"What should {fighter} do?",
+                        choices=fighter.moves,
+                    ),
+        ]
+        
+        choice_move = inquirer.prompt(choice_move)
+        print(f"{fighter} used {choice_move['move']}!")
+        print(fighter.damage(foe,choice_move['move']))
+
+        print(f"--- hp du foe avant: {hp_foe}")
+        hp_foe = hp_foe - fighter.damage(foe,choice_move['move'])
+        print(f"--- hp du foe après: {hp_foe}")
+
+    if choice_action['action'] == 'Pokémons':
+        choice_pokemon = [
+        inquirer.List('pokemon',
+                        message=f"Choose a Pokémon",
+                        choices=my_pokemons,
+                    ),
+        ]
+
+        choice_pokemon = inquirer.prompt(choice_pokemon)
+        fighter = choice_pokemon['pokemon']
+
+    # à compléter
+    if choice_action['action'] == 'Run':
+        print("You can't run")
+
+    foe_move = random.choice(foe.moves)
+    print(f"Foe {foe} used {foe_move}")
+    print(f"--- hp du fighter avant: {hp_fighter}")
+    hp_fighter = hp_fighter - foe.damage(fighter,foe_move)
+    print(f"--- hp du fighter après: {hp_fighter}")
+
+# print(f"{answers['your_pokemon'].upper()} used !")
+# print("TRAINER CHRISTINA would like to battle!")
+# print("TRAINER CHRISTINA send out ")
+
+#fin de la boucle while
+if hp_foe <= 0:
+    print(f"Wild {foe} fainted!\n")
+else:
+    print(usable_pokemons)
+    print(f"{fighter} fainted!\n")
+    usable_pokemons.remove(fighter)
+    print(usable_pokemons)
+
+###########################################
+################INTERFACE##################
+###########################################
+
+layout = Layout(name="root")
+
+layout.split(
+    Layout(name="pokemons"),
+    Layout(name="messages"),
+)
+layout["pokemons"].split_column(
+    Layout(name="foe"),
+    Layout(name="player"),
+)
+layout["foe"].split_row(
+    Layout(name="hp", ratio=2),
+    Layout(name="name"),
+)
+
+layout["player"].split_row(
+    Layout(name="name"),
+    Layout(name="hp", ratio=2),
+)
+
+layout["pokemons"].size = 10
+layout["messages"].size = 8
+
+hp_progress_foe = Progress(
+    "{task.description}",
+    SpinnerColumn(),
+    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+    BarColumn(),
+)
+
+hp_progress_player = Progress(
+    "{task.description}",
+    SpinnerColumn(),
+    BarColumn(),
+    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+    MofNCompleteColumn(separator='/', table_column=None),
+)
+
+hp_progress_foe.add_task("[magenta]HP")
+hp_progress_player.add_task("[red]HP", total=200)
+
+progress_table_player = Table.grid(expand=True)
+progress_table_player.add_row(
+    Panel(hp_progress_player, border_style="green", padding=(1, 2))
+)
+
+progress_table_foe = Table.grid(expand=True)
+progress_table_foe.add_row(
+    Panel(hp_progress_foe, border_style="magenta", padding=(1, 2))
+)
+
+pokemon_name = Table.grid(padding=1, expand=True)
+pokemon_name.add_column(style="b cyan2", justify="left")
+pokemon_name.add_column(style="b magenta")
+pokemon_name.add_column(style="b plum1", justify="right")
+pokemon_name.add_row(
+    "Zubat",
+    "|",
+    "Lvl:1",
+)
+
+pokemon_name_panel = Panel(pokemon_name, border_style="red", padding=(1, 2)#, height=5
+)
+
+pokemon_panel_foe = Table.grid(padding=1, expand=True)
+pokemon_panel_foe.add_column(style="b magenta", ratio=1)
+pokemon_panel_foe.add_column(justify="right", style="b cyan", ratio=2)
+pokemon_panel_foe.add_row(
+    pokemon_name_panel,
+    progress_table_foe,
+)
+
+pokemon_panel_player = Table.grid(padding=1, expand=True)
+pokemon_panel_player.add_column(style="b magenta", ratio=2)
+pokemon_panel_player.add_column(justify="right", style="b cyan", ratio=1)
+pokemon_panel_player.add_row(
+    progress_table_player,
+    pokemon_name_panel,
+)
+
+def print_message(message):
+    instructions = Table.grid(padding=1, expand=True)
+    instructions.add_row(message)
+
+    message_panel = Panel(instructions,
+    box=box.ROUNDED,
+    padding=(1, 2),
+    title="[b orange1]message panel",
+    border_style="cyan")
+
+    return message_panel
+
+# message = "#######"
+# instructions = Table.grid(padding=1, expand=True)
+# instructions.add_row(message)
+
+# message_panel = Panel(instructions,
+#     box=box.ROUNDED,
+#     padding=(1, 2),
+#     title="[b orange1]message panel",
+#     border_style="cyan")
+
+interface = Panel(
+        Align.center(
+            Group(pokemon_panel_foe,pokemon_panel_player, print_message("###")),
+            vertical="middle",
+        ),
+        box=box.DOUBLE,
+        padding=(1, 2),
+        title="[b blue_violet]POKEMON GAME",
+        title_align='right',
+        border_style="blue_violet",
+    )
+
+interface_layout = Panel(
+        layout,
+        box=box.DOUBLE,
+        padding=(1, 1),
+        title="[b blue_violet]POKEMON GAME",
+        title_align='right',
+        border_style="blue_violet",
+        width=80,
+        height=22,
+    )
+
+layout["messages"].update(print_message("WILD POKEMON"))
+layout["pokemons"]["foe"]["hp"].update(progress_table_foe)
+layout["pokemons"]["foe"]["name"].update(pokemon_name_panel)
+layout["pokemons"]["player"]["hp"].update(progress_table_player)
+layout["pokemons"]["player"]["name"].update(pokemon_name_panel)
+
+layout["messages"].update(print_message("ZUBAT ATTACK"))

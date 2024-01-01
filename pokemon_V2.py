@@ -319,7 +319,7 @@ def prompt_fight():
     random.shuffle(player_pokemon.moves)
     choice_move = [
     inquirer.List('move',
-                    message=f"What should {player_pokemon} do?",
+                    message=f"What should {player_pokemon}({player_pokemon_hp}) do?",
                     choices=player_pokemon.moves,
                 ),
     ]
@@ -343,8 +343,8 @@ def prompt_change():
 def prompt_action():
     choice_action = [
     inquirer.List('action',
-                    message=f"What should {player_pokemon} do?",
-                    choices=['FIGHT', 'CHANGE POKéMON', f"SEE {player_pokemon} SUMMARY"],
+                    message=f"What do you want to do do?",
+                    choices=[f"FIGHT WITH {player_pokemon}", 'CHANGE POKéMON', f"SEE {player_pokemon} SUMMARY"],
                 ),
     ]
 
@@ -354,15 +354,12 @@ def prompt_action():
 
 def display_move(pokemon, move):
     if pokemon == trainer_pokemon:
-        print(f"[cornflower_blue bold]{pokemon} used {move}!")
+        print(f"[cyan2 bold]{pokemon} used {move}!")
     else:
         print(f"{pokemon} used [bold]{move}")
 
 def subtract_damage(pokemon_hp, damage):
     return pokemon_hp - damage
-
-# def display_hp(team, pokemon):
-#     return team[pokemon]
 
 def pick_opponent():
     return random.choice(trainer_team)
@@ -414,7 +411,7 @@ print("Thank you.\n")
 time.sleep(2)
 print(f"Your random Pokémon is...")
 time.sleep(4)
-print(f"[bold chartreuse3]{random_pokemon}[/] !!!\n")
+print(f"[bold orchid1]{random_pokemon}[/] !!!\n")
 time.sleep(4)
 
 # variable utilisée pour le bilan en fin de partie
@@ -445,7 +442,7 @@ player_pokemon_hp = player_team_hp[player_pokemon]
 
 print(f"And your first opponent is...")
 time.sleep(4)
-print(f"[bold cornflower_blue]{trainer_pokemon}[/] !!!\n")
+print(f"[bold cyan2]{trainer_pokemon}[/] !!!\n")
 time.sleep(4)
 
 # boucle while 1 = boucle d'entrée et de sortie du combat pour le player
@@ -472,7 +469,7 @@ while len(player_team) != 0:
         time.sleep(3)
         action = prompt_action()
 
-        if action == 'FIGHT':
+        if action == f"FIGHT WITH {player_pokemon}":
             move = prompt_fight()
             display_move(player_pokemon, move)
             damage = player_pokemon.damage(trainer_pokemon,move)
@@ -491,10 +488,10 @@ while len(player_team) != 0:
                     trainer_pokemon = pick_opponent()
                     trainer_pokemon_hp = trainer_team_hp[trainer_pokemon]
                     print("")
-                    print(f"[cornflower_blue bold]Trainer sends {trainer_pokemon} !!!\n")
+                    print(f"[cyan2 bold]Trainer sends {trainer_pokemon} !!!\n")
                     time.sleep(3)
             else:
-                print(f"Trainer's {trainer_pokemon} is now {trainer_pokemon_hp}\n")
+                print(f"Trainer's {trainer_pokemon} has now {trainer_pokemon_hp} HP\n")
                 time.sleep(3)
 
         if action == 'CHANGE POKéMON':
@@ -514,13 +511,13 @@ while len(player_team) != 0:
         player_team_hp[player_pokemon] = player_pokemon_hp
 
         if player_pokemon_hp <= 0:
-            print(f"[cornflower_blue bold]Your {player_pokemon} has fainted!\n")
+            print(f"[cyan2 bold]Your {player_pokemon} has fainted!\n")
             player_team.remove(player_pokemon)
             check_ending()
             time.sleep(3)
             break
         else:
-            print(f"[cornflower_blue bold]Your {player_pokemon} is now {player_pokemon_hp}\n")
+            print(f"[cyan2 bold]Your {player_pokemon} has now {player_pokemon_hp} HP\n")
             time.sleep(3)
 
 ###### BILAN FIN DE PARTIE######

@@ -7,7 +7,7 @@ import time
 from inquirer.themes import Default
 import inquirer
 from blessed import Terminal
-import inquirer.errors as errors
+# import inquirer.errors as errors
 
 term = Terminal()
 console = Console()
@@ -312,13 +312,10 @@ def prompt_team():
     ]
     prompt_team = inquirer.prompt(prompt_team, theme=ThemeTeam())
     pokemon = prompt_team['team']
-    # player_team.add(pokemon)
     player_team.append(pokemon)
-    # NEW #
     available_pokemons.remove(pokemon)
 
 def prompt_fight():
-    #TEST#
     random.shuffle(player_pokemon.moves)
     choice_move = [
     inquirer.List('move',
@@ -410,17 +407,16 @@ while len(player_team) < 3:
 # and one is random
 while len(player_team) < 4:
     random_pokemon = random.choice(available_pokemons)
-    # player_team.add(random_pokemon)
     player_team.append(random_pokemon)
 
 time.sleep(1)
 print("Thank you.\n")
 time.sleep(2)
 print(f"Your random Pokémon is...")
-time.sleep(5)
+time.sleep(4)
 print(f"[bold chartreuse3]{random_pokemon}[/] !!!\n")
-time.sleep(5)
-# player_team = list(player_team)
+time.sleep(4)
+
 # variable utilisée pour le bilan en fin de partie
 mem_player_team = [str(pokemon.name) for pokemon in player_team]
 for pokemon in mem_player_team:
@@ -430,7 +426,7 @@ for pokemon in mem_player_team:
 print("\nYour team is now complete.")
 time.sleep(3)
 print("You may enter the arena.\n")
-time.sleep(5)
+time.sleep(4)
 
 ###########################################
 ##############PHASE 3: FIGHT###############
@@ -448,9 +444,9 @@ trainer_pokemon_hp = trainer_team_hp[trainer_pokemon]
 player_pokemon_hp = player_team_hp[player_pokemon]
 
 print(f"And your first opponent is...")
-time.sleep(5)
+time.sleep(4)
 print(f"[bold cornflower_blue]{trainer_pokemon}[/] !!!\n")
-time.sleep(5)
+time.sleep(4)
 
 # boucle while 1 = boucle d'entrée et de sortie du combat pour le player
 # entrée = entrée en jeu d'un pokémon du player, soit début de la partie ou remplacement d'un pokémon mort (!= changement d'un pokémon)
@@ -467,21 +463,8 @@ while len(player_team) != 0:
     
     #si on se retrouve dans cette boucle sans avoir une équipe au complet (moins de 4) c'est qu'un de nos pokémons est mort
     if len(player_team) < 4:
-        # print("(changement de pokemon)")
-        # choice_pokemon = [
-        # inquirer.List('pokemon',
-        #                 message=f"Choose a Pokémon",
-        #                 choices=player_team,
-        #             ),
-        # ]
-        # choice_pokemon = inquirer.prompt(choice_pokemon)
-        # player_pokemon = choice_pokemon['pokemon']
-        # player_pokemon_hp = player_team_hp[player_pokemon]
         player_pokemon = prompt_change()
         player_pokemon_hp = player_team_hp[player_pokemon]
-
-        # print(f"Go! [bold]{player_pokemon}!\n")
-        # print(f"(check hp player_pokemon {player_pokemon} {player_pokemon_hp})")
 
     # boucle while 2: phase de combat d'un pokémon du joueur et début d'une partie
     # à ajouter: choisir quel joueur commence en fonction de la vitesse du pokémon choisi
@@ -528,6 +511,7 @@ while len(player_team) != 0:
         time.sleep(3)
         damage = trainer_pokemon.damage(player_pokemon,move)
         player_pokemon_hp = subtract_damage(player_pokemon_hp, damage)
+        player_team_hp[player_pokemon] = player_pokemon_hp
 
         if player_pokemon_hp <= 0:
             print(f"[cornflower_blue bold]Your {player_pokemon} has fainted!\n")
